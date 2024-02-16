@@ -34,8 +34,12 @@ func NewComplexNeuralNetwork(inputSize, hiddenSize, outputSize int) *ComplexNeur
 
 func (nn *ComplexNeuralNetwork) Forward(inputData []complex128) []complex128 {
 	// Forward pass using complex matrix multiplication
-	hiddenOutput := applyActivation(complexMatrixVectorProduct(nn.WeightsIH, inputData), cmplx.Tanh) + nn.BiasHidden
-	finalOutput := applyActivation(complexMatrixVectorProduct(nn.WeightsHO, hiddenOutput), cmplx.Tanh) + nn.BiasOutput
+	hiddenOutput := applyActivation(complexMatrixVectorProduct(nn.WeightsIH, inputData), cmplx.Tanh)
+	finalOutput := applyActivation(complexMatrixVectorProduct(nn.WeightsHO, hiddenOutput), cmplx.Tanh)
+
+	// Element-wise addition with biases
+	hiddenOutput = elementWiseAddition(hiddenOutput, nn.BiasHidden)
+	finalOutput = elementWiseAddition(finalOutput, nn.BiasOutput)
 
 	return finalOutput
 }
@@ -70,6 +74,14 @@ func applyActivation(vector []complex128, activationFunc func(complex128) comple
 	result := make([]complex128, len(vector))
 	for i := 0; i < len(vector); i++ {
 		result[i] = activationFunc(vector[i])
+	}
+	return result
+}
+
+func elementWiseAddition(a, b []complex128) []complex128 {
+	result := make([]complex128, len(a))
+	for i := 0; i < len(a); i++ {
+		result[i] = a[i] + b[i]
 	}
 	return result
 }
